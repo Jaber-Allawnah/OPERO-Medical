@@ -56,7 +56,7 @@ export default function SignUpScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
+         >
           <Text style={styles.title}>SIGN UP</Text>
 
           <Image
