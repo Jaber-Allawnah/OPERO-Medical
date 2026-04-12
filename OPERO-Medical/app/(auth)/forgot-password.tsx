@@ -44,7 +44,6 @@ export default function ForgotPasswordScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
 
           <View style={styles.headerWrapper}>
             <Text style={styles.headerTitle}>RESET PASSWORD</Text>
