@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     summaryText: {
         fontSize: RFValue(15),
         marginBottom: Spacing.xs,
-        color: Colors.primary,
+        color: Colors.nero,
     },
     row: {
         flexDirection: 'row',
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     paymentButton: {
         width: wp('65%'),
         height: hp('7%'),
-        borderRadius: RFValue(Spacing.md),
+        borderRadius: Spacing.xxl,
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
