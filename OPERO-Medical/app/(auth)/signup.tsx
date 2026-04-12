@@ -145,17 +145,8 @@ export default function SignUpScreen() {
             name="password"
             rules={{
               required: 'Password is required',
-              validate: {
-                minLength: (v: any) =>
-                  v.length >= 8 || 'Password must be at least 8 characters',
-                hasUpper: (v: any) =>
-                  /[A-Z]/.test(v) || 'Password must contain an uppercase letter',
-                hasLower: (v: any) =>
-                  /[a-z]/.test(v) || 'Password must contain a lowercase letter',
-                hasSpecial: (v: any) =>
-                  /[!@#$%^&*]/.test(v) ||
-                  'Password must contain a special character (!@#$%^&*)',
-              },
+              minLength:{ value:6, message:"Password must be at least 6 characters long"
+            },
             }}
             placeholder="Enter Your Password"
             secureTextEntry
