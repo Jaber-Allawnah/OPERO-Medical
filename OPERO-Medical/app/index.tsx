@@ -3,11 +3,12 @@ import { Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platfo
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { Colors } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
 import {router} from "expo-router";
 import {login} from "@/services/auth.service";
 import {saveSecure} from "@/services/storage.service";
+import {getMe} from "@/services/user.service";
 
 export default function LoginScreen() {
 
@@ -19,6 +20,7 @@ export default function LoginScreen() {
     try {
       const { token } = await login(data.email, data.password);
       await saveSecure("token", token);
+      await getMe();
       router.replace('/(app)/doctors');
     } catch (error: any) {
       const code = error?.code;
@@ -118,10 +120,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: wp('8%'),
-    paddingBottom: hp('4%'),
+    paddingBottom: Spacing.xl,
   },
   title: {
-    marginTop: hp('6%'),
+    marginTop: Spacing.xxl,
     fontSize: RFValue(22),
     fontWeight: 'bold',
     color: Colors.nero,
@@ -130,11 +132,11 @@ const styles = StyleSheet.create({
   logo: {
     width: wp('55%'),
     height: hp('25%'),
-    marginVertical: hp('3%'),
+    marginVertical: Spacing.lg,
   },
   forgotWrapper: {
     alignSelf: 'flex-end',
-    marginBottom: hp('3%'),
+    marginBottom: Spacing.lg,
   },
   forgotText: {
     fontSize: RFValue(12),
@@ -143,10 +145,10 @@ const styles = StyleSheet.create({
   loginButton: {
     width: wp('60%'),
     height: hp('6.5%'),
-    borderRadius: RFValue(25),
+    borderRadius: Spacing.xxl,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: hp('3%'),
+    marginBottom: Spacing.lg,
     backgroundColor: Colors.primary,
   },
   loginButtonText: {
@@ -157,12 +159,12 @@ const styles = StyleSheet.create({
   or: {
     fontSize: RFValue(13),
     color: Colors.black50,
-    marginBottom: hp('1.5%'),
+    marginBottom: Spacing.sm,
   },
   newUser: {
     fontSize: RFValue(13),
     color: Colors.nero,
-    marginBottom: hp('1%'),
+    marginBottom: Spacing.xs,
   },
   signUp: {
     fontSize: RFValue(14),

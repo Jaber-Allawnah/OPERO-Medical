@@ -6,15 +6,12 @@
  * Margin : 16  |  Gutter : 16  |  Type : Stretch
  */
 
-// ─── Colors ───────────────────────────────────────────────────────────────────
+// Colors
 
 export const Colors = {
-  // Primary gradient — use with expo-linear-gradient
-  // start: #0099D6  →  end: #1469AF
   primaryGradientStart: '#0099D6',
   primaryGradientEnd:   '#1469AF',
 
-  // Solid version of primary (use when gradient is not possible)
   primary: '#1469AF',       // Denim Blue
 
   nero:    '#292929',       // Dark text / backgrounds
@@ -43,23 +40,19 @@ export const Colors = {
   },
 };
 
-// ─── Spacing ──────────────────────────────────────────────────────────────────
-// From Figma spacing scale. Use with RFValue() when applying in StyleSheet.
+// Spacing
+// All values are multiples of 4.
+// Use these for margins, padding, border radius, and gaps — NOT for widths/heights.
+// Widths and heights → wp() / hp()
+// Fonts → RFValue()
 
 export const Spacing = {
+  xxs: 4,
   xs:  8,
-  sm:  16,   // also used as margin and gutter
-  md:  24,
-  lg:  32,
-  xl:  40,
+  sm:  12,
+  md:  16,
+  lg:  24,
+  xl:  32,
   xxl: 48,
 };
 
-// ─── Layout ───────────────────────────────────────────────────────────────────
-
-export const Layout = {
-  frameWidth:  390,
-  frameHeight: 844,
-  margin:      16,
-  gutter:      16,
-};

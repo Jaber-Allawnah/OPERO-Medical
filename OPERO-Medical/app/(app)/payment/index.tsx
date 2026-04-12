@@ -8,7 +8,7 @@
  * - Build a payment form using useForm (react-hook-form).
  * - Fields: cardholder name, card number, expiry date, CVV.
  * - Use KeyboardAvoidingView + ScrollView so the form isn't hidden by the keyboard.
- * - On submit, call the processPayment and bookAppointment functions (Axios).
+ * - On submit, call the processPayment .
  * - Navigate to /(app)/appointments using router.replace() after successful payment.
  * - Use SafeAreaView for safe spacing.
  * - Use RFValue / widthPercentageToDP for all sizes (no px).

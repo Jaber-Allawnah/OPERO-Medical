@@ -2,7 +2,7 @@ import { Controller } from 'react-hook-form';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { Colors } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 
 export default function FormInput({ control, name, rules, error, ...rest }: any) {
   return (
@@ -31,14 +31,14 @@ export default function FormInput({ control, name, rules, error, ...rest }: any)
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
-    marginBottom: hp('2%'),
+    marginBottom: Spacing.md,
   },
   inputWrapper: {
     width: '100%',
     borderWidth: 1,
     borderColor: Colors.primary,
-    borderRadius: RFValue(25),
-    paddingHorizontal: wp('5%'),
+    borderRadius: Spacing.xxl,
+    paddingHorizontal: Spacing.lg,
     height: hp('6.5%'),
     justifyContent: 'center',
     backgroundColor: Colors.white,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   error: {
     color: Colors.red,
     fontSize: RFValue(11),
-    marginTop: hp('0.5%'),
-    marginLeft: wp('2%'),
+    marginTop: Spacing.xxs,
+    marginLeft: Spacing.xs,
   },
 });
