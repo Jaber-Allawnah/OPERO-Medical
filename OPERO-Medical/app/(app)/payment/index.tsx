@@ -15,7 +15,7 @@ export default function PaymentScreen() {
     const time = typeof params.time === 'string' ? params.time : '';
     const amount = typeof params.amount === 'string' ? params.amount : '';
 
-    const {control,handleSubmit,formState: { errors },
+        const {control,handleSubmit,formState: { errors }}=useForm({
           defaultValues: {
             cardHolderName: '',
             cardNumber: '',
