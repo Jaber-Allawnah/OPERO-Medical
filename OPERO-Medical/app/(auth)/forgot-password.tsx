@@ -43,7 +43,7 @@ export default function ForgotPasswordScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}>
 
           <View style={styles.headerWrapper}>
             <Text style={styles.headerTitle}>RESET PASSWORD</Text>
