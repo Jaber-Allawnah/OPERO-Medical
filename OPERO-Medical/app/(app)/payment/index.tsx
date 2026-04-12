@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.sm,
         textAlign: 'center',
         letterSpacing: 2,
-        color: Colors.primary,
+        color: Colors.nero,
     },
     summaryText: {
         fontSize: RFValue(15),
