@@ -1,7 +1,8 @@
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile} from "firebase/auth";
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile,sendPasswordResetEmail} from "firebase/auth";
 import { auth } from "./firebase";
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
+
 export const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const token = await userCredential.user.getIdToken();
@@ -26,6 +27,9 @@ export const register = async (name: string, email: string, password: string, ph
     const token = await userCredential.user.getIdToken();
 
     return { token };
+};
+export const resetPassword = async (email: string) => {
+  await sendPasswordResetEmail(auth, email);
 };
 
 export const logout = async () => {
