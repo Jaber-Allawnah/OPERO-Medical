@@ -1,26 +1,11 @@
 import { useForm } from 'react-hook-form';
-import {
-    Text,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    ScrollView,
-    Platform,
-    StyleSheet,
-    View,
-} from 'react-native';
+import {Text,TouchableOpacity,KeyboardAvoidingView,ScrollView,Platform,StyleSheet,View,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
-import {
-    widthPercentageToDP as wp,
-    heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {widthPercentageToDP as wp,heightPercentageToDP as hp,} from 'react-native-responsive-screen';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
-
-const processPayment = async (data: any) => {
-    return data;
-};
 
 export default function PaymentScreen() {
     const params = useLocalSearchParams();
@@ -30,12 +15,8 @@ export default function PaymentScreen() {
     const time = typeof params.time === 'string' ? params.time : '';
     const amount = typeof params.amount === 'string' ? params.amount : '';
 
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<any>({
-        defaultValues: {
+    const {control,handleSubmit,formState: { errors },
+          defaultValues: {
             cardHolderName: '',
             cardNumber: '',
             expiryDate: '',
@@ -56,8 +37,7 @@ export default function PaymentScreen() {
 
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled">
+                    showsVerticalScrollIndicator={false}>
 
                     <View style={styles.summaryContainer}>
                         <Text style={styles.title}>PAYMENT</Text>
@@ -72,8 +52,7 @@ export default function PaymentScreen() {
                         name="cardHolderName"
                         rules={{ required: 'Card Holder Name is required' }}
                         placeholder="Card Holder Name"
-                        error={errors.cardHolderName?.message}
-                    />
+                        error={errors.cardHolderName?.message}/>
 
                     <FormInput
                         control={control}
@@ -81,8 +60,7 @@ export default function PaymentScreen() {
                         rules={{ required: 'Card Number is required' }}
                         placeholder="Card Number"
                         keyboardType="number-pad"
-                        error={errors.cardNumber?.message}
-                    />
+                        error={errors.cardNumber?.message}/>
 
                     <View style={styles.row}>
                         <View style={styles.halfWidth}>
@@ -91,8 +69,7 @@ export default function PaymentScreen() {
                                 name="expiryDate"
                                 rules={{ required: 'Expiry Date is required' }}
                                 placeholder="Expiry Date"
-                                error={errors.expiryDate?.message}
-                            />
+                                error={errors.expiryDate?.message}/>
                         </View>
 
                         <View style={styles.halfWidth}>
@@ -102,8 +79,7 @@ export default function PaymentScreen() {
                                 rules={{ required: 'CVV is required' }}
                                 placeholder="CVV"
                                 keyboardType="number-pad"
-                                error={errors.cvv?.message}
-                            />
+                                error={errors.cvv?.message}/>
                         </View>
                     </View>
 
