@@ -1,90 +1,88 @@
 import { useForm } from 'react-hook-form';
-import {Text,TouchableOpacity,KeyboardAvoidingView,ScrollView,Platform,StyleSheet,Alert,View,} from 'react-native';
+import {Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert, View,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
-import {widthPercentageToDP as wp,heightPercentageToDP as hp,} from 'react-native-responsive-screen';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp,} from 'react-native-responsive-screen';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
 import { resetPassword } from '@/services/auth.service';
+import ActionButton from '@/components/ui/ActionButton';
+import useAuthMutation from '@/hooks/useAuthMutation';
 
 export default function ForgotPasswordScreen() {
-  const {control,handleSubmit,formState: { errors },} = useForm({
+  const {control, handleSubmit, formState: { errors },} = useForm({
     defaultValues: {
       email: '',
-  },
+    },
   });
 
-  const onSubmit = async (data: any) => {
-    try {
-      await resetPassword(data.email);
-      Alert.alert(
-        'Success',
-        'A reset password link has been sent to your email.'
-      );
+  const handleResetPassword = async (data: any) => {
+    await resetPassword(data.email);
+  };
 
+  const resetPasswordMutation = useAuthMutation({
+    mutationKey: ['resetPassword'],
+    mutationFn: handleResetPassword,
+    onSuccess: () => {
+      Alert.alert('Success', 'A reset password link has been sent to your email.');
       router.back();
-    } catch (error: any) {
-      const code = error?.code;
-      if (code === 'auth/user-not-found') {
-        Alert.alert('Error', 'No account found with this email.');
-      } else if (code === 'auth/invalid-email') {
-        Alert.alert('Error', 'Please enter a valid email address.');
-      } else {
-        Alert.alert('Error', 'Something went wrong. Please try again.');
-      }
-    }
+    },
+    onError: (error: any) => {Alert.alert(`Error ${error?.code}`);}
+
+  });
+
+  const onSubmit = (data: any) => {
+    resetPasswordMutation.mutate(data);
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+            style={styles.keyboardView}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}>
 
-          <View style={styles.headerWrapper}>
-            <Text style={styles.headerTitle}>RESET PASSWORD</Text>
-          </View>
+            <View style={styles.headerWrapper}>
+              <Text style={styles.headerTitle}>RESET PASSWORD</Text>
+            </View>
 
-          <View style={styles.descriptionWrapper}>
-            <Text style={styles.description}>
-              Enter the email associated with your account, and we’ll send an
-              email link with instructions to reset your password.
-            </Text>
-          </View>
+            <View style={styles.descriptionWrapper}>
+              <Text style={styles.description}>
+                Enter the email associated with your account, and we’ll send an
+                email link with instructions to reset your password.
+              </Text>
+            </View>
 
-          <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Email</Text>
 
-          <FormInput
-            control={control}
-            name="email"
-            rules={{
-              required: 'Email is required',
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Enter a valid email address',
-              },
-            }}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={errors.email?.message}/>
+            <FormInput
+                control={control}
+                name="email"
+                rules={{
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                }}
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={errors.email?.message}
+            />
 
-          <TouchableOpacity
-            style={styles.button}
-            activeOpacity={0.85}
-            onPress={handleSubmit(onSubmit)}>
-            <Text style={styles.buttonText}>
-              Send Reset Password Link
-            </Text>
-          </TouchableOpacity>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <ActionButton
+                title={resetPasswordMutation.isPending ? 'Sending...' : 'Send Reset Password Link'
+                }
+                onPress={handleSubmit(onSubmit)}
+                style={styles.button}
+                textStyle={styles.buttonText}/>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
   );
 }
 
