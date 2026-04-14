@@ -17,21 +17,15 @@ export const register = async (name: string, email: string, password: string, ph
         displayName: name,
     });
     await setDoc(doc(db, 'users', userCredential.user.uid), {
-    name,
-    email,
-    phone,
-    role,
-    profilePicture: '',
+        name,
+        email,
+        phone,
+        role,
+        profilePicture: '',
     });
-    // In the signup screen, add a role selector and pass it to register(name, email, password, phone, role)
-    await getMe();
-
-    const token = await userCredential.user.getIdToken();
-
-    return { token };
 };
 export const resetPassword = async (email: string) => {
-  await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email);
 };
 
 export const logout = async () => {
