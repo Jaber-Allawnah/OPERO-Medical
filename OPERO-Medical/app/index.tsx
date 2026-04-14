@@ -1,105 +1,108 @@
 import { useForm } from 'react-hook-form';
-import { Text, TouchableOpacity, Image, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert } from 'react-native';
+import {Text, Image, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
-import {router} from "expo-router";
-import {login} from "@/services/auth.service";
-import {saveSecure} from "@/services/storage.service";
-import {getMe} from "@/services/user.service";
+import { login } from '@/services/auth.service';
+import { saveSecure } from '@/services/storage.service';
+import { getMe } from '@/services/user.service';
+import ActionButton from '@/components/ui/ActionButton';
+import useAuthMutation from "@/hooks/useAuthMutation";
 
 export default function LoginScreen() {
-
-  const { control, handleSubmit, formState: { errors }} = useForm({
+  const {control, handleSubmit, formState: { errors },} = useForm({
     defaultValues: { email: '', password: '' },
   });
+  const handleLogin=async (data: any)=>{
+    const { token } = await login(data.email, data.password);
+    await saveSecure('token', token);
+    await getMe();
+    return token;
+  }
 
-  const onSubmit = async (data: any) => {
-    try {
-      const { token } = await login(data.email, data.password);
-      await saveSecure("token", token);
-      await getMe();
-      router.replace('/(app)/doctors');
-    } catch (error: any) {
-      const code = error?.code;
-      if (code === 'auth/invalid-credential' || code === 'auth/user-not-found' || code === 'auth/wrong-password') {
-        Alert.alert('Login Failed', 'Incorrect email or password.');
-      } else if (code === 'auth/too-many-requests') {
-        Alert.alert('Login Failed', 'Too many attempts. Please try again later.');
-      } else {
-        Alert.alert('Login Failed', 'Something went wrong. Please try again.');
-      }
-    }
+  const loginMutation = useAuthMutation({
+    mutationKey: ['login'],
+    mutationFn: handleLogin,
+    onSuccess: () => {router.replace('/(app)/doctors');},
+    onError: (error: any) => {Alert.alert(`Error ${error?.code}`);
+    },
+  });
+
+  const onSubmit = (data: any) => {
+    loginMutation.mutate(data);
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+            style={styles.keyboardView}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
-        <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}>
+          <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}>
+            <Text style={styles.title}>LOG IN</Text>
 
-          <Text style={styles.title}>LOG IN</Text>
+            <Image
+                source={require('@/assets/images/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"/>
 
-          <Image
-            source={require('@/assets/images/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"/>
+            <FormInput
+                control={control}
+                name="email"
+                rules={{
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                }}
+                placeholder="Enter your Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={errors.email?.message}/>
 
-          <FormInput
-            control={control}
-            name="email"
-            rules={{
-              required: 'Email is required',
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Enter a valid email address',
-              },
-            }}
-            placeholder="Enter your Email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={errors.email?.message}/>
+            <FormInput
+                control={control}
+                name="password"
+                rules={{
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters long',
+                  },
+                }}
+                placeholder="Enter your Password"
+                secureTextEntry
+                error={errors.password?.message}/>
 
-          <FormInput
-            control={control}
-            name="password"
-            rules={{
-              required: 'Password is required',
-              minLength:{ value:6, message:"Password must be atleast 6 characters long"
-            }}}
-            placeholder="Enter your Password"
-            secureTextEntry
-            error={errors.password?.message}/>
+            <ActionButton
+                title="Forgot Password?"
+                onPress={() => router.push('/(auth)/forgot-password')}
+                style={styles.forgotWrapper}
+                textStyle={styles.forgotText}/>
 
-          <TouchableOpacity
-            style={styles.forgotWrapper}
-            onPress={() => router.push('/(auth)/forgot-password' as any)}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            <ActionButton
+                title={loginMutation.isPending ? 'Loading...' : 'Login'}
+                onPress={handleSubmit(onSubmit)}
+                style={styles.loginButton}
+                textStyle={styles.loginButtonText}/>
 
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={handleSubmit(onSubmit)}
-            activeOpacity={0.85}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
+            <Text style={styles.or}>OR</Text>
 
-          <Text style={styles.or}>OR</Text>
+            <Text style={styles.newUser}>Are you a New User?</Text>
 
-          <Text style={styles.newUser}>Are you a New User?</Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-            <Text style={styles.signUp}>SIGN UP</Text>
-          </TouchableOpacity>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <ActionButton
+                title="SIGN UP"
+                onPress={() => router.push('/(auth)/signup')}
+                textStyle={styles.signUp}/>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
   );
 }
 
@@ -112,7 +115,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flex: 1,
     alignItems: 'center',
     paddingHorizontal: wp('8%'),
     paddingBottom: Spacing.xl,
