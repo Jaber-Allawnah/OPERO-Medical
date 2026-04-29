@@ -21,7 +21,7 @@ export default function SignUpScreen() {
             password: '',
             confirmPassword: ''}});
     const handleRegister=async (data: any)=>{
-        await register(data.name, data.email, data.password, data.phone, selectedRole);
+        await register(data.name, data.email, data.password, data.phone, selectedRole, data.specialty || '');
     }
     const signUpMutation = useAuthMutation({
         mutationKey: ['register'],
@@ -103,6 +103,15 @@ export default function SignUpScreen() {
                                 textStyle={[styles.roleButtonText, selectedRole === 'doctor' && styles.roleButtonTextActive]}/>
                         </View>
                     </View>
+
+                    {selectedRole === 'doctor' && (
+                        <FormInput
+                            control={control}
+                            name="specialty"
+                            rules={{ required: selectedRole === 'doctor' ? 'Specialty is required' : false }}
+                            placeholder="Enter Your Specialty (e.g. Cardiology)"
+                            error={errors.specialty?.message}/>
+                    )}
 
                     <FormInput
                         control={control}

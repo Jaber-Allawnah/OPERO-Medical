@@ -10,9 +10,9 @@
 
 export const Colors = {
   primaryGradientStart: '#0099D6',
-  primaryGradientEnd:   '#1469AF',
+  primaryGradientEnd:   '#1979A9',
 
-  primary: '#1469AF',       // Denim Blue
+  primary: '#1979A9',       // Denim Blue
 
   nero:    '#292929',       // Dark text / backgrounds
   black50: 'rgba(0,0,0,0.5)', // Black at 50% opacity
@@ -25,10 +25,10 @@ export const Colors = {
   light: {
     text: '#292929',
     background: '#F5F5F5',
-    tint: '#1469AF',
+    tint: '#1979A9',
     icon: '#292929',
     tabIconDefault: 'rgba(0,0,0,0.5)',
-    tabIconSelected: '#1469AF',
+    tabIconSelected: '#1979A9',
   },
   dark: {
     text: '#FFFFFF',

@@ -1,9 +1,22 @@
-import { Stack } from 'expo-router';
+import {router, Stack} from 'expo-router';
 import 'react-native-reanimated';
 import {QueryClientProvider} from "@tanstack/react-query";
 import {queryClient} from "@/app/libs/queryClient";
+import {useEffect} from "react";
+import {getSecure} from "@/services/storage.service";
 
 export default function RootLayout() {
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = await getSecure('token');
+
+            if (token) {
+                router.replace('/(app)/doctors');
+            }
+        };
+
+        checkAuth();
+    }, []);
   return (
     <>
         <QueryClientProvider client={queryClient}>
