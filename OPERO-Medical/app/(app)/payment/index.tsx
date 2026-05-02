@@ -1,40 +1,25 @@
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import {
-    Text,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    ScrollView,
-    Platform,
-    StyleSheet,
-    View,
-} from 'react-native';
+import {Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, View, Alert,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
-import {
-    widthPercentageToDP as wp,
-    heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { router, useLocalSearchParams } from 'expo-router';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
-
-const processPayment = async (data: any) => {
-    return data;
-};
+import ActionButton from '@/components/ui/ActionButton';
+import { processPayment } from '@/services/appointments.service';
+import { getFromStorage, removeFromStorage } from '@/services/storage.service';
 
 export default function PaymentScreen() {
-    const params = useLocalSearchParams();
+    const [appointmentInfo, setAppointmentInfo] = useState<any>({
+        doctor: '',
+        date: '',
+        time: '',
+        amount: '',
+    });
 
-    const doctor = typeof params.doctor === 'string' ? params.doctor : '';
-    const date = typeof params.date === 'string' ? params.date : '';
-    const time = typeof params.time === 'string' ? params.time : '';
-    const amount = typeof params.amount === 'string' ? params.amount : '';
-
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<any>({
+    const {control, handleSubmit, formState: { errors },} = useForm({
         defaultValues: {
             cardHolderName: '',
             cardNumber: '',
@@ -43,9 +28,33 @@ export default function PaymentScreen() {
         },
     });
 
-    const onSubmit = async (data: any) => {
-        await processPayment(data);
-        router.replace('/(app)/appointments');
+    useEffect(() => {
+        const loadAppointmentInfo = async () => {
+            const storedAppointment = await getFromStorage('pendingAppointment');
+
+            if (storedAppointment) {
+                setAppointmentInfo(storedAppointment);
+            }
+        };
+        loadAppointmentInfo();
+    }, []);
+
+    const onSubmit = async () => {
+        try {
+            await processPayment({
+                doctor: appointmentInfo.doctor,
+                date: appointmentInfo.date,
+                time: appointmentInfo.time,
+                amount: appointmentInfo.amount,
+            });
+
+            await removeFromStorage('pendingAppointment');
+
+            Alert.alert('Success', 'Payment has been completed successfully.');
+            router.replace('/(app)/appointments');
+        } catch (error) {
+            Alert.alert('Error', 'Something went wrong while processing payment.');
+        }
     };
 
     return (
@@ -53,18 +62,15 @@ export default function PaymentScreen() {
             <KeyboardAvoidingView
                 style={styles.keyboardView}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled">
-
+                    showsVerticalScrollIndicator={false}>
                     <View style={styles.summaryContainer}>
                         <Text style={styles.title}>PAYMENT</Text>
-                        <Text style={styles.summaryText}>Doctor: {doctor}</Text>
-                        <Text style={styles.summaryText}>Date: {date}</Text>
-                        <Text style={styles.summaryText}>Time: {time}</Text>
-                        <Text style={styles.summaryText}>Amount: {amount}</Text>
+                        <Text style={styles.summaryText}>Doctor: {appointmentInfo.doctor}</Text>
+                        <Text style={styles.summaryText}>Date: {appointmentInfo.date}</Text>
+                        <Text style={styles.summaryText}>Time: {appointmentInfo.time}</Text>
+                        <Text style={styles.summaryText}>Amount: {appointmentInfo.amount}</Text>
                     </View>
 
                     <FormInput
@@ -72,17 +78,21 @@ export default function PaymentScreen() {
                         name="cardHolderName"
                         rules={{ required: 'Card Holder Name is required' }}
                         placeholder="Card Holder Name"
-                        error={errors.cardHolderName?.message}
-                    />
+                        error={errors.cardHolderName?.message}/>
 
                     <FormInput
                         control={control}
                         name="cardNumber"
-                        rules={{ required: 'Card Number is required' }}
+                        rules={{
+                            required: 'Card Number is required',
+                            minLength: {
+                                value: 16,
+                                message: 'Card number must be 16 digits',
+                            },
+                        }}
                         placeholder="Card Number"
                         keyboardType="number-pad"
-                        error={errors.cardNumber?.message}
-                    />
+                        error={errors.cardNumber?.message}/>
 
                     <View style={styles.row}>
                         <View style={styles.halfWidth}>
@@ -91,15 +101,20 @@ export default function PaymentScreen() {
                                 name="expiryDate"
                                 rules={{ required: 'Expiry Date is required' }}
                                 placeholder="Expiry Date"
-                                error={errors.expiryDate?.message}
-                            />
+                                error={errors.expiryDate?.message}/>
                         </View>
 
                         <View style={styles.halfWidth}>
                             <FormInput
                                 control={control}
                                 name="cvv"
-                                rules={{ required: 'CVV is required' }}
+                                rules={{
+                                    required: 'CVV is required',
+                                    minLength: {
+                                        value: 3,
+                                        message: 'CVV must be at least 3 digits',
+                                    },
+                                }}
                                 placeholder="CVV"
                                 keyboardType="number-pad"
                                 error={errors.cvv?.message}
@@ -107,13 +122,11 @@ export default function PaymentScreen() {
                         </View>
                     </View>
 
-                    <TouchableOpacity
-                        style={styles.paymentButton}
+                    <ActionButton
+                        title="Done"
                         onPress={handleSubmit(onSubmit)}
-                        activeOpacity={0.85}>
-                        <Text style={styles.paymentButtonText}>Done</Text>
-                    </TouchableOpacity>
-
+                        style={styles.paymentButton}
+                        textStyle={styles.paymentButtonText}/>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -129,7 +142,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        flexGrow: 1,
         justifyContent: 'center',
         paddingHorizontal: Spacing.sm,
         paddingTop: Spacing.lg,
@@ -139,17 +151,17 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
     },
     title: {
-        fontSize: RFValue(24),
+        marginTop: Spacing.md,
+        fontSize: RFValue(22),
         fontWeight: 'bold',
-        marginBottom: Spacing.sm,
-        textAlign: 'center',
+        color: Colors.nero,
         letterSpacing: 2,
-        color: Colors.primary,
+        textAlign:"center"
     },
     summaryText: {
         fontSize: RFValue(15),
         marginBottom: Spacing.xs,
-        color: Colors.primary,
+        color: Colors.nero,
     },
     row: {
         flexDirection: 'row',
@@ -162,7 +174,7 @@ const styles = StyleSheet.create({
     paymentButton: {
         width: wp('65%'),
         height: hp('7%'),
-        borderRadius: RFValue(Spacing.md),
+        borderRadius: Spacing.xxl,
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',

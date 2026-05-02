@@ -1,20 +1,31 @@
-/**
- * Root Layout
- * TODO (Shared): Wrap with QueryClientProvider here when ready.
- */
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import {router, Stack} from 'expo-router';
 import 'react-native-reanimated';
+import {QueryClientProvider} from "@tanstack/react-query";
+import {queryClient} from "@/app/libs/queryClient";
+import {useEffect} from "react";
+import {getSecure} from "@/services/storage.service";
 
 export default function RootLayout() {
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = await getSecure('token');
+
+            if (token) {
+                router.replace('/(app)/doctors');
+            }
+        };
+
+        checkAuth();
+    }, []);
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(app)" />
-      </Stack>
-      <StatusBar style="auto" />
+        <QueryClientProvider client={queryClient}>
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(app)" />
+            </Stack>
+        </QueryClientProvider>
     </>
   );
 }
