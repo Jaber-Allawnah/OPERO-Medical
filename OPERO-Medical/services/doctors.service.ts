@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, increment, arrayRemove } from 'firebase/firestore';
 import { db } from './firebase';
 
 export const getAllDoctors = async () => {
@@ -14,6 +14,24 @@ export const getAllDoctors = async () => {
         })
     );
     return doctors;
+};
+
+export const updateDoctorProfile = async (uid: string, data: any) => {
+    await setDoc(doc(db, 'doctors', uid), {
+        price: Number(data.price) || 0,
+        experience: data.experience,
+        bio: data.bio,
+        specialty: data.specialty,
+        availableSlots: data.availableSlots,
+    }, { merge: true });
+};
+
+export const removeSlotFromDoctor = async (doctorId: string, slot: string) => {
+    await updateDoc(doc(db, 'doctors', doctorId), { availableSlots: arrayRemove(slot) });
+};
+
+export const incrementDoctorCases = async (uid: string) => {
+    await updateDoc(doc(db, 'doctors', uid), { cases: increment(1) });
 };
 
 export const getDoctorById = async (id: string): Promise<any> => {

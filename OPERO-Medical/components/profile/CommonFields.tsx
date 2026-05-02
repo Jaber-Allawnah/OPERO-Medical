@@ -9,9 +9,9 @@ import FormInput from '@/components/ui/FormInput';
 export default function CommonFields({ control, errors }: any) {
   return (
     <>
-      <FormInput control={control} name="name" label="UserName" rules={{ required: 'Name is required' }} error={errors.name?.message} />
-      <FormInput control={control} name="email" label="Email" keyboardType="email-address" rules={{ required: 'Email is required' }} error={errors.email?.message} />
-      <FormInput control={control} name="phone" label="PhoneNumber" keyboardType="phone-pad" error={errors.phone?.message} />
+      <FormInput control={control} name="name" placeholder="Full Name" rules={{ required: 'Name is required' }} error={errors.name?.message} />
+      <FormInput control={control} name="email" placeholder="Email" keyboardType="email-address" rules={{ required: 'Email is required' }} error={errors.email?.message} />
+      <FormInput control={control} name="phone" placeholder="Phone Number" keyboardType="phone-pad" error={errors.phone?.message} />
 
       <TouchableOpacity style={styles.changePasswordRow} onPress={() => router.push('/change-password')} activeOpacity={0.8}>
         <Text style={styles.changePasswordText}>Change Password</Text>

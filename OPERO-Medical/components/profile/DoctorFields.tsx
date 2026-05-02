@@ -9,10 +9,10 @@ import ActionButton from '@/components/ui/ActionButton';
 export default function DoctorFields({ control, errors, slots, onUpdateSlot, onRemoveSlot, onAddSlot }: any) {
   return (
     <>
-      <FormInput control={control} name="price" label="Price" keyboardType="numeric" error={errors.price?.message} />
-      <FormInput control={control} name="experience" label="Experience" error={errors.experience?.message} />
-      <FormInput control={control} name="bio" label="Bio" multiline error={errors.bio?.message} />
-      <FormInput control={control} name="specialty" label="Specialty" error={errors.specialty?.message} />
+      <FormInput control={control} name="price" placeholder="Price (₪)" keyboardType="numeric" error={errors.price?.message} />
+      <FormInput control={control} name="experience" placeholder="Years of Experience" error={errors.experience?.message} />
+      <FormInput control={control} name="bio" placeholder="Bio" multiline error={errors.bio?.message} />
+      <FormInput control={control} name="specialty" placeholder="Specialty" error={errors.specialty?.message} />
 
       {slots.map((slot: string, index: number) => (
         <View key={index} style={styles.slotRow}>
