@@ -7,26 +7,27 @@ import { getMe } from './user.service';
 export const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const token = await userCredential.user.getIdToken();
+    await getMe();
     return { token };
 };
 
-export const register = async (name: string, email: string, password: string, phone: string, role: string, specialty: string) => {
+export const register = async (name: string, email: string, password: string, phone: string, role: string, extras: any = {}) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
     await updateProfile(userCredential.user, { displayName: name });
 
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-        name,
-        email,
-        phone,
-        role,
-        profilePicture: '',
-    });
+    const userDoc: any = { name, email, phone, role, profilePicture: '' };
+    if (role === 'patient') {
+        userDoc.weight = extras.weight || '';
+        userDoc.bloodGroup = extras.bloodGroup || '';
+        userDoc.height = extras.height || '';
+    }
 
-    // If the user is a doctor, also create a doctors document
+    await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
+
     if (role === 'doctor') {
         await setDoc(doc(db, 'doctors', userCredential.user.uid), {
-            specialty: specialty || '',
+            specialty: extras.specialty || '',
             bio: '',
             experience: 0,
             availableSlots: [],
