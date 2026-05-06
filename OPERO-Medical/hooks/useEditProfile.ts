@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { getCachedUser, getMe, updateUserProfile, waitForUser } from '@/services/user.service';
+import { getCachedUser, getMe, updateUserProfile, updateProfilePicture, waitForUser } from '@/services/user.service';
 import { updateDoctorProfile, getDoctorById } from '@/services/doctors.service';
 
 export default function useEditProfile() {
@@ -89,5 +89,10 @@ export default function useEditProfile() {
     setSlots((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  return { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot };
+  const updateAvatar = useCallback(async (uid: string, url: string) => {
+    await updateProfilePicture(uid, url);
+    setUser((prev: any) => ({ ...prev, profilePicture: url }));
+  }, []);
+
+  return { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot, updateAvatar };
 }

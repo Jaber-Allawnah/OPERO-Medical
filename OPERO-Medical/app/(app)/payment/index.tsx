@@ -89,10 +89,12 @@ export default function PaymentScreen() {
                         name="cvv"
                         rules={{
                             required: 'CVV is required',
-                            minLength: { value: 3, message: 'CVV must be at least 3 digits' },
+                            minLength: { value: 3, message: 'CVV must be 3 digits' },
+                            maxLength: { value: 3, message: 'CVV must be 3 digits' },
                         }}
                         placeholder="CVV"
                         keyboardType="number-pad"
+                        maxLength={3}
                         error={errors.cvv?.message}
                     />
                 </View>
