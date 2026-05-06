@@ -143,6 +143,17 @@ status: "confirmed"
 createdAt: Timestamp
 ```
 
+### `payments/{id}`
+```
+patientId: string
+doctorName: string
+date: string
+time: string
+amount: string
+status: "paid"
+createdAt: Timestamp
+```
+
 ---
 
 ## Features
