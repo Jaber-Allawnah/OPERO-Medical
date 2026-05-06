@@ -12,16 +12,16 @@ import ActionButton from '@/components/ui/ActionButton';
 import { register } from '@/services/auth.service';
 import useAuthMutation from '@/hooks/useAuthMutation';
 
+const SPECIALTIES = [
+    'Cardiology', 'Dermatology', 'Neurology', 'Orthopedics',
+    'Pediatrics', 'Gynecology', 'Ophthalmology', 'ENT', 'Psychiatry',
+    'General Practice', 'Dentistry', 'Oncology', 'Gastroenterology',
+    'Urology', 'Endocrinology', 'Pulmonology',
+];
+
 export default function SignUpScreen() {
     const [selectedRole, setSelectedRole] = useState('patient');
     const [selectedSpecialty, setSelectedSpecialty] = useState('');
-
-    const SPECIALTIES = [
-        'Cardiology', 'Dermatology', 'Neurology', 'Orthopedics',
-        'Pediatrics', 'Gynecology', 'Ophthalmology', 'ENT', 'Psychiatry',
-        'General Practice', 'Dentistry', 'Oncology', 'Gastroenterology',
-        'Urology', 'Endocrinology', 'Pulmonology',
-    ];
 
     const { control, handleSubmit, getValues, formState: { errors } } = useForm<any>({
         defaultValues: { name: '', email: '', phone: '', password: '', confirmPassword: '' },

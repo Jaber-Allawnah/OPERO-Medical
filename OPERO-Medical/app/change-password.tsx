@@ -49,7 +49,7 @@ export default function ChangePasswordScreen() {
       <FormInput
         control={control}
         name="currentPassword"
-        label="Current Password"
+        placeholder="Current Password"
         secureTextEntry
         rules={{ required: 'Current password is required' }}
         error={errors.currentPassword?.message}
@@ -58,7 +58,7 @@ export default function ChangePasswordScreen() {
       <FormInput
         control={control}
         name="newPassword"
-        label="New Password"
+        placeholder="New Password"
         secureTextEntry
         rules={{
           required: 'New password is required',
@@ -70,7 +70,7 @@ export default function ChangePasswordScreen() {
       <FormInput
         control={control}
         name="confirmPassword"
-        label="Confirm New Password"
+        placeholder="Confirm New Password"
         secureTextEntry
         rules={{
           required: 'Please confirm your new password',

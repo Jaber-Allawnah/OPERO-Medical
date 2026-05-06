@@ -9,7 +9,7 @@ import BackButton from '@/components/ui/BackButton';
 import UserAvatar from '@/components/ui/UserAvatar';
 import MenuItem from '@/components/ui/MenuItem';
 import { logout } from '@/services/auth.service';
-import { removeSecure } from '@/services/storage.service';
+import { removeSecure, removeFromStorage } from '@/services/storage.service';
 import useCurrentUser from '@/hooks/useCurrentUser';
 
 export default function ProfileScreen() {
@@ -18,6 +18,7 @@ export default function ProfileScreen() {
   const handleLogout = useCallback(async () => {
     await logout();
     await removeSecure('token');
+    await removeFromStorage('user');
     router.replace('/');
   }, []);
 

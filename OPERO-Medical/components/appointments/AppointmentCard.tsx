@@ -7,7 +7,7 @@ import UserAvatar from '@/components/ui/UserAvatar';
 export default function AppointmentCard({ appointment, role, onDelete }: any) {
     const isDoctor = role === 'doctor';
     const name = isDoctor ? appointment.patientName : `Dr. ${appointment.doctorName}`;
-    const photo = isDoctor ? null : appointment.doctorPhoto;
+    const photo = isDoctor ? appointment.patientPhoto : appointment.doctorPhoto;
 
     return (
         <View style={styles.card}>

@@ -3,8 +3,6 @@ import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, update
 import { auth, db } from './firebase';
 import { saveToStorage, getFromStorage } from './storage.service';
 
-// Fetches the current user's data from Firestore and caches it in AsyncStorage.
-// Call this after login. Read from AsyncStorage anywhere else in the app.
 export const getMe = async () => {
     const uid = auth.currentUser?.uid as any;
     const userDoc = await getDoc(doc(db, 'users', uid));
@@ -45,7 +43,12 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     await updatePassword(user, newPassword);
 };
 
-// Reads the cached user data from AsyncStorage (no Firestore call).
 export const getCachedUser = async () => {
     return await getFromStorage('user');
+};
+
+export const updateProfilePicture = async (uid: string, url: string) => {
+    await updateDoc(doc(db, 'users', uid), { profilePicture: url });
+    const cached = await getCachedUser();
+    await saveToStorage('user', { ...cached, profilePicture: url });
 };
