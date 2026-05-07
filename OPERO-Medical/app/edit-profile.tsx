@@ -15,7 +15,7 @@ import PatientFields from '@/components/profile/PatientFields';
 import DoctorFields from '@/components/profile/DoctorFields';
 import useEditProfile from '@/hooks/useEditProfile';
 import { uploadToCloudinary } from '@/services/cloudinary.service';
-import { waitForUser } from '@/services/user.service';
+import { waitForUser, getCachedUser } from '@/services/user.service';
 
 export default function EditProfileScreen() {
   const { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot, updateAvatar } = useEditProfile();
@@ -38,7 +38,10 @@ export default function EditProfileScreen() {
       if (!photo?.uri) return;
       const url = await uploadToCloudinary(photo.uri);
       const firebaseUser = await waitForUser();
-      await updateAvatar(firebaseUser.uid, url);
+      const cached = await getCachedUser();
+      const uid = firebaseUser?.uid ?? cached?.uid;
+      if (!uid) throw new Error('User is not authenticated.');
+      await updateAvatar(uid, url);
       setShowCamera(false);
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to upload photo.');

@@ -28,11 +28,10 @@ export const updateUserProfile = async (uid: string, data: any) => {
 };
 
 export const waitForUser = () =>
-    new Promise<any>((resolve, reject) => {
+    new Promise<any>((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             unsubscribe();
-            if (user) resolve(user);
-            else reject(new Error('User is not authenticated.'));
+            resolve(user);
         });
     });
 

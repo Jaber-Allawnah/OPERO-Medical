@@ -17,12 +17,14 @@ export default function useEditProfile() {
   useEffect(() => {
     const load = async () => {
       const firebaseUser = await waitForUser();
-      const uid = firebaseUser.uid;
+      const cached = await getCachedUser();
+      const uid = firebaseUser?.uid ?? cached?.uid;
+      if (!uid) return;
 
       let userData: any = null;
       try { userData = await getMe(); } catch {}
 
-      const currentUser = userData ?? await getCachedUser();
+      const currentUser = userData ?? cached;
       if (!currentUser) return;
 
       currentUser.uid = uid;
@@ -58,7 +60,9 @@ export default function useEditProfile() {
     setIsSaving(true);
     try {
       const firebaseUser = await waitForUser();
-      const uid = firebaseUser.uid;
+      const cached = await getCachedUser();
+      const uid = firebaseUser?.uid ?? cached?.uid;
+      if (!uid) throw new Error('User is not authenticated.');
 
       await updateUserProfile(uid, data);
       if (user?.role === 'doctor') {

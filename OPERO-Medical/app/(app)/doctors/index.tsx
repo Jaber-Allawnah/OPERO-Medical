@@ -27,6 +27,7 @@ export default function DoctorsScreen() {
   const [db, setDb] = useState<SQLite.SQLiteDatabase | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [offlineDoctors, setOfflineDoctors] = useState<any[]>([]);
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const { data, isLoading } = useQuery({
     queryKey: ['doctors'],
@@ -61,7 +62,7 @@ export default function DoctorsScreen() {
       if (!cancelled) setDb(database);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshCount]);
 
   const reload = useCallback(async () => {
     if (!db) return;
@@ -93,7 +94,13 @@ export default function DoctorsScreen() {
             <Text style={styles.helloText}>Hello {user?.name?.split(' ')[0] ?? 'User'}</Text>
           </View>
           <Text style={styles.feelingText}>How Are You{'\n'}Feeling Today?</Text>
-          {!isOnline && <Text style={styles.offlineBanner}>You are offline — showing cached doctors</Text>}
+          <View style={styles.offlineRow}>
+            <TouchableOpacity onPress={() => setRefreshCount((c) => c + 1)} style={styles.refreshBtn} activeOpacity={0.8}>
+              <Ionicons name="refresh-outline" size={RFValue(18)} color={Colors.white} />
+              <Text style={styles.refreshText}>Refresh (Offline First Test)</Text>
+            </TouchableOpacity>
+            {!isOnline && <Text style={styles.offlineBanner}>You are offline</Text>}
+          </View>
           <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={RFValue(18)} color={Colors.black50} />
             <TextInput
@@ -182,6 +189,9 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: Colors.primary },
   chipText: { fontSize: RFValue(12), color: Colors.primary },
   chipTextActive: { color: Colors.white },
+  offlineRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
+  refreshBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xxs },
+  refreshText: { fontSize: RFValue(11), color: Colors.white },
   loader: { marginTop: Spacing.xxl },
   emptyText: { textAlign: 'center', fontSize: RFValue(14), color: Colors.black50, marginTop: Spacing.xxl },
   grid: {

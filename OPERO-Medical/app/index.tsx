@@ -22,8 +22,8 @@ export default function LoginScreen() {
     (async () => {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      const biometricEnabled = await getSecure('biometricEnabled');
-      setBiometricAvailable(hasHardware && isEnrolled && biometricEnabled === 'true');
+      const token = await getSecure('token');
+      setBiometricAvailable(hasHardware && isEnrolled && !!token);
     })();
   }, []);
 
@@ -47,6 +47,7 @@ export default function LoginScreen() {
     });
 
     if (result.success) {
+      await saveSecure('biometricEnabled', 'true');
       const user = await getCachedUser() as any;
       router.replace(user?.role === 'doctor' ? '/(app)/appointments' : '/(app)/doctors');
     } else {
