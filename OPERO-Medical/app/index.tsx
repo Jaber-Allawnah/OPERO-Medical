@@ -1,108 +1,157 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import {Text, Image, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert,} from 'react-native';
+import { Text, Image, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { router } from 'expo-router';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
 import { login } from '@/services/auth.service';
-import { saveSecure } from '@/services/storage.service';
-import { getMe } from '@/services/user.service';
+import { saveSecure, getSecure } from '@/services/storage.service';
+import { getMe, getCachedUser } from '@/services/user.service';
 import ActionButton from '@/components/ui/ActionButton';
 import useAuthMutation from "@/hooks/useAuthMutation";
 
 export default function LoginScreen() {
-  const {control, handleSubmit, formState: { errors },} = useForm({
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const token = await getSecure('token');
+      setBiometricAvailable(hasHardware && isEnrolled && !!token);
+    })();
+  }, []);
+
+  const handleBiometricLogin = useCallback(async () => {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    if (!hasHardware) {
+      Alert.alert('This device does not support Face ID / biometric login.');
+      return;
+    }
+
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolled) {
+      Alert.alert('No Face ID / fingerprint is set up on this device.');
+      return;
+    }
+
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Login with Face ID',
+      fallbackLabel: 'Use Passcode',
+      cancelLabel: 'Cancel',
+    });
+
+    if (result.success) {
+      await saveSecure('biometricEnabled', 'true');
+      const user = await getCachedUser() as any;
+      router.replace(user?.role === 'doctor' ? '/(app)/appointments' : '/(app)/doctors');
+    } else {
+      Alert.alert('Authentication failed or cancelled.');
+    }
+  }, []);
+
+  const { control, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { email: '', password: '' },
   });
-  const handleLogin=async (data: any)=>{
+
+  const handleLogin = useCallback(async (data: any) => {
     const { token } = await login(data.email, data.password);
     await saveSecure('token', token);
-    await getMe();
-    return token;
-  }
+    await saveSecure('biometricEnabled', 'true');
+    const user = await getMe() as any;
+    return { token, role: user?.role };
+  }, []);
 
   const loginMutation = useAuthMutation({
     mutationKey: ['login'],
     mutationFn: handleLogin,
-    onSuccess: () => {router.replace('/(app)/doctors');},
-    onError: (error: any) => {Alert.alert(`Error ${error?.code}`);
+    onSuccess: (result: any) => {
+      router.replace(result?.role === 'doctor' ? '/(app)/appointments' : '/(app)/doctors');
     },
+    onError: (error: any) => { Alert.alert(`Error ${error?.code}`); },
   });
 
-  const onSubmit = (data: any) => {
-    loginMutation.mutate(data);
-  };
-
   return (
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-            style={styles.keyboardView}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
-          <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}>
-            <Text style={styles.title}>LOG IN</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <Text style={styles.title}>LOG IN</Text>
 
-            <Image
-                source={require('@/assets/images/logo.png')}
-                style={styles.logo}
-                resizeMode="contain"/>
+          <Image
+            source={require('@/assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain" />
 
-            <FormInput
-                control={control}
-                name="email"
-                rules={{
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Enter a valid email address',
-                  },
-                }}
-                placeholder="Enter your Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={errors.email?.message}/>
+          <FormInput
+            control={control}
+            name="email"
+            rules={{
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            }}
+            placeholder="Enter your Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={errors.email?.message} />
 
-            <FormInput
-                control={control}
-                name="password"
-                rules={{
-                  required: 'Password is required',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters long',
-                  },
-                }}
-                placeholder="Enter your Password"
-                secureTextEntry
-                error={errors.password?.message}/>
+          <FormInput
+            control={control}
+            name="password"
+            rules={{
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters long',
+              },
+            }}
+            placeholder="Enter your Password"
+            secureTextEntry
+            error={errors.password?.message} />
 
-            <ActionButton
-                title="Forgot Password?"
-                onPress={() => router.push('/(auth)/forgot-password')}
-                style={styles.forgotWrapper}
-                textStyle={styles.forgotText}/>
+          <ActionButton
+            title="Forgot Password?"
+            onPress={() => router.push('/(auth)/forgot-password')}
+            style={styles.forgotWrapper}
+            textStyle={styles.forgotText} />
 
-            <ActionButton
-                title={loginMutation.isPending ? 'Loading...' : 'Login'}
-                onPress={handleSubmit(onSubmit)}
-                style={styles.loginButton}
-                textStyle={styles.loginButtonText}/>
+          <ActionButton
+            title={loginMutation.isPending ? 'Loading...' : 'Login'}
+            onPress={handleSubmit((data) => loginMutation.mutate(data as any))}
+            style={styles.loginButton}
+            textStyle={styles.loginButtonText} />
 
-            <Text style={styles.or}>OR</Text>
 
-            <Text style={styles.newUser}>Are you a New User?</Text>
+          {biometricAvailable && (
+            <TouchableOpacity style={styles.biometricButton} onPress={handleBiometricLogin} activeOpacity={0.8}>
+              <Ionicons name="scan-outline" size={RFValue(28)} color={Colors.primary} />
+              <Text style={styles.biometricText}>Login with Face ID / Fingerprint</Text>
+            </TouchableOpacity>
+          )}
 
-            <ActionButton
-                title="SIGN UP"
-                onPress={() => router.push('/(auth)/signup')}
-                textStyle={styles.signUp}/>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+          <Text style={styles.or}>OR</Text>
+
+          <Text style={styles.newUser}>Are you a New User?</Text>
+
+          <ActionButton
+            title="SIGN UP"
+            onPress={() => router.push('/(auth)/signup')}
+            textStyle={styles.signUp} />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -167,5 +216,14 @@ const styles = StyleSheet.create({
     fontSize: RFValue(14),
     fontWeight: 'bold',
     color: Colors.nero,
+  },
+  biometricButton: {
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  biometricText: {
+    fontSize: RFValue(12),
+    color: Colors.primary,
+    marginTop: Spacing.xs,
   },
 });

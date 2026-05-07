@@ -8,6 +8,7 @@ export const bookAppointment = async (data: any) => {
     await addDoc(collection(db, 'appointments'), {
         patientId: user.uid,
         patientName: user.name ?? '',
+        patientPhoto: user.profilePicture ?? '',
         doctorId: data.doctor.id,
         doctorName: data.doctor.name,
         doctorPhoto: data.doctor.photo ?? '',

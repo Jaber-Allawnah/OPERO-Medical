@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { getCachedUser, getMe, updateUserProfile, waitForUser } from '@/services/user.service';
+import { getCachedUser, getMe, updateUserProfile, updateProfilePicture, waitForUser } from '@/services/user.service';
 import { updateDoctorProfile, getDoctorById } from '@/services/doctors.service';
 
 export default function useEditProfile() {
@@ -17,12 +17,14 @@ export default function useEditProfile() {
   useEffect(() => {
     const load = async () => {
       const firebaseUser = await waitForUser();
-      const uid = firebaseUser.uid;
+      const cached = await getCachedUser();
+      const uid = firebaseUser?.uid ?? cached?.uid;
+      if (!uid) return;
 
       let userData: any = null;
       try { userData = await getMe(); } catch {}
 
-      const currentUser = userData ?? await getCachedUser();
+      const currentUser = userData ?? cached;
       if (!currentUser) return;
 
       currentUser.uid = uid;
@@ -58,7 +60,9 @@ export default function useEditProfile() {
     setIsSaving(true);
     try {
       const firebaseUser = await waitForUser();
-      const uid = firebaseUser.uid;
+      const cached = await getCachedUser();
+      const uid = firebaseUser?.uid ?? cached?.uid;
+      if (!uid) throw new Error('User is not authenticated.');
 
       await updateUserProfile(uid, data);
       if (user?.role === 'doctor') {
@@ -89,5 +93,10 @@ export default function useEditProfile() {
     setSlots((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  return { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot };
+  const updateAvatar = useCallback(async (uid: string, url: string) => {
+    await updateProfilePicture(uid, url);
+    setUser((prev: any) => ({ ...prev, profilePicture: url }));
+  }, []);
+
+  return { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot, updateAvatar };
 }

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import {Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert, View,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,9 +18,9 @@ export default function ForgotPasswordScreen() {
     },
   });
 
-  const handleResetPassword = async (data: any) => {
+  const handleResetPassword = useCallback(async (data: any) => {
     await resetPassword(data.email);
-  };
+  }, []);
 
   const resetPasswordMutation = useAuthMutation({
     mutationKey: ['resetPassword'],
@@ -28,13 +29,8 @@ export default function ForgotPasswordScreen() {
       Alert.alert('Success', 'A reset password link has been sent to your email.');
       router.back();
     },
-    onError: (error: any) => {Alert.alert(`Error ${error?.code}`);}
-
+    onError: (error: any) => { Alert.alert(`Error ${error?.code}`); },
   });
-
-  const onSubmit = (data: any) => {
-    resetPasswordMutation.mutate(data);
-  };
 
   return (
       <SafeAreaView style={styles.safeArea}>
@@ -77,7 +73,7 @@ export default function ForgotPasswordScreen() {
             <ActionButton
                 title={resetPasswordMutation.isPending ? 'Sending...' : 'Send Reset Password Link'
                 }
-                onPress={handleSubmit(onSubmit)}
+                onPress={handleSubmit((data) => resetPasswordMutation.mutate(data as any))}
                 style={styles.button}
                 textStyle={styles.buttonText}/>
           </ScrollView>
