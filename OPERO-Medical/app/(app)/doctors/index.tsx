@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -12,6 +12,8 @@ import { Colors, Spacing } from '@/constants/theme';
 import DoctorCard from '@/components/doctors/DoctorCard';
 import { getAllDoctors } from '@/services/doctors.service';
 import { getCachedUser } from '@/services/user.service';
+import ActionButton from '@/components/ui/ActionButton';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 const SPECIALIZATIONS = [
   'All', 'Cardiology', 'Dermatology', 'Neurology', 'Orthopedics',
@@ -47,40 +49,39 @@ export default function DoctorsScreen() {
     (async () => {
       const netState = await Network.getNetworkStateAsync();
       const online = (netState.isConnected && netState.isInternetReachable) ?? true;
-      if (!cancelled) setIsOnline(!!online);
+      if (!cancelled) setIsOnline(online);
 
-      const database = await SQLite.openDatabaseAsync('doctors_offline.db');
-      await database.execAsync(
-        'CREATE TABLE IF NOT EXISTS doctors (id INTEGER PRIMARY KEY, name TEXT, specialty TEXT, experience INTEGER);'
-      );
-      const existing = await database.getAllAsync('SELECT * FROM doctors');
-      if (existing.length === 0) {
-        await database.runAsync('INSERT INTO doctors VALUES (1, ?, ?, ?)', ['Jaber', 'Cardiology', 5]);
-        await database.runAsync('INSERT INTO doctors VALUES (2, ?, ?, ?)', ['Ibrahim', 'Neurology', 8]);
-        await database.runAsync('INSERT INTO doctors VALUES (3, ?, ?, ?)', ['Abdallah', 'Orthopedics', 3]);
+      if (!online) {
+        const database = await SQLite.openDatabaseAsync('doctors_offline.db');
+        await database.execAsync(
+          'CREATE TABLE IF NOT EXISTS doctors (id INTEGER PRIMARY KEY, name TEXT, specialty TEXT, experience INTEGER);'
+        );
+        const existing = await database.getAllAsync('SELECT * FROM doctors');
+        if (existing.length === 0) {
+          await database.runAsync('INSERT INTO doctors VALUES (1, ?, ?, ?)', ['Jaber', 'Cardiology', 5]);
+          await database.runAsync('INSERT INTO doctors VALUES (2, ?, ?, ?)', ['Ibrahim', 'Neurology', 8]);
+          await database.runAsync('INSERT INTO doctors VALUES (3, ?, ?, ?)', ['Abdallah', 'Orthopedics', 3]);
+        }
+        if (!cancelled) setDb(database);
       }
-      if (!cancelled) setDb(database);
     })();
     return () => { cancelled = true; };
   }, [refreshCount]);
 
-  const reload = useCallback(async () => {
+  useEffect(() => {
     if (!db) return;
-    const rows = await db.getAllAsync<{ id: number; name: string; specialty: string; experience: number }>(
+    db.getAllAsync<{id: number; name: string; specialty: string; experience: number }>(
       'SELECT * FROM doctors;'
-    );
-    setOfflineDoctors(rows);
+    ).then(setOfflineDoctors);
   }, [db]);
 
-  useEffect(() => { void reload(); }, [reload]);
+  const doctors = isOnline ? (data ?? []) : offlineDoctors;
 
-  const onlineDoctors = (data ?? []).filter((doctor: any) => {
+  const displayDoctors = doctors.filter((doctor: any) => {
     const matchesSearch = doctor.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSpec = selectedSpec === 'All' || doctor.specialty === selectedSpec;
     return matchesSearch && matchesSpec;
   });
-
-  const displayDoctors = isOnline ? onlineDoctors : offlineDoctors;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,9 +89,7 @@ export default function DoctorsScreen() {
 
         <View style={styles.headerCard}>
           <View style={styles.avatarRow}>
-            {user?.profilePicture
-              ? <Image source={{ uri: user.profilePicture }} style={styles.avatar} />
-              : <View style={styles.avatar}><Ionicons name="person" size={RFValue(22)} color={Colors.primary} /></View>}
+            <UserAvatar uri={user?.profilePicture} size={hp('5%')} iconSize={RFValue(22)} style={styles.avatar} />
             <Text style={styles.helloText}>Hello {user?.name?.split(' ')[0] ?? 'User'}</Text>
           </View>
           <Text style={styles.feelingText}>How Are You{'\n'}Feeling Today?</Text>
@@ -99,7 +98,6 @@ export default function DoctorsScreen() {
               <Ionicons name="refresh-outline" size={RFValue(18)} color={Colors.white} />
               <Text style={styles.refreshText}>Refresh (Offline First Test)</Text>
             </TouchableOpacity>
-            {!isOnline && <Text style={styles.offlineBanner}>You are offline</Text>}
           </View>
           <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={RFValue(18)} color={Colors.black50} />
@@ -113,19 +111,17 @@ export default function DoctorsScreen() {
           </View>
         </View>
 
-        {isOnline && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
-            {SPECIALIZATIONS.map((spec) => (
-              <TouchableOpacity
-                key={spec}
-                style={[styles.chip, selectedSpec === spec && styles.chipActive]}
-                onPress={() => setSelectedSpec(spec)}
-                activeOpacity={0.8}>
-                <Text style={[styles.chipText, selectedSpec === spec && styles.chipTextActive]}>{spec}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsContainer}>
+          {SPECIALIZATIONS.map((spec) => (
+            <ActionButton
+              key={spec}
+              title={spec}
+              onPress={() => setSelectedSpec(spec)}
+              style={[styles.chip, selectedSpec === spec && styles.chipActive]}
+              textStyle={[styles.chipText, selectedSpec === spec && styles.chipTextActive]}
+            />
+          ))}
+        </ScrollView>
 
         {isOnline && isLoading && <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />}
         {displayDoctors.length === 0 && !isLoading && <Text style={styles.emptyText}>No doctors found.</Text>}
@@ -157,12 +153,7 @@ const styles = StyleSheet.create({
   },
   avatarRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm },
   avatar: {
-    width: hp('5%'),
-    height: hp('5%'),
-    borderRadius: hp('2.5%'),
     backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginRight: Spacing.xs,
   },
   helloText: { fontSize: RFValue(13), color: Colors.white, fontWeight: '500' },

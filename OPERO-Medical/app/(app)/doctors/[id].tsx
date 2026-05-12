@@ -11,6 +11,7 @@ import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Colors, Spacing } from '@/constants/theme';
 import ActionButton from '@/components/ui/ActionButton';
+import BackButton from '@/components/ui/BackButton';
 import DoctorAbout from '@/components/doctors/DoctorAbout';
 import DoctorAvailability from '@/components/doctors/DoctorAvailability';
 import { getDoctorById } from '@/services/doctors.service';
@@ -59,11 +60,7 @@ export default function DoctorDetailsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerCard}>
-        <ActionButton
-          title="←"
-          onPress={() => router.back()}
-          style={styles.backBtn}
-          textStyle={styles.backBtnText}/>
+        <BackButton onPress={() => router.back()} />
         <View style={styles.imageWrapper}>
           {doctor.profilePicture ? (
             <Image source={{ uri: doctor.profilePicture }} style={styles.doctorImage} />) : (
@@ -121,19 +118,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.lg,
   },
-  backBtn: {
-    width: hp('4.5%'),
-    height: hp('4.5%'),
-    borderRadius: hp('2.25%'),
-    backgroundColor: Colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backBtnText: {
-    fontSize: RFValue(20),
-    color: Colors.primary,
-  },
-  imageWrapper: {
+imageWrapper: {
     alignSelf: 'center',
     width: wp('45%'),
     height: hp('22%'),

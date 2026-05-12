@@ -3,14 +3,13 @@ import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
-import BackButton from '@/components/ui/BackButton';
 import UserAvatar from '@/components/ui/UserAvatar';
 import MenuItem from '@/components/ui/MenuItem';
 import { logout } from '@/services/auth.service';
 import { saveSecure } from '@/services/storage.service';
 import useCurrentUser from '@/hooks/useCurrentUser';
+import {router} from "expo-router";
 
 export default function ProfileScreen() {
   const user = useCurrentUser();
@@ -25,14 +24,12 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
 
       <View style={styles.headerCard}>
-        <BackButton onPress={() => router.back()} />
         <View style={styles.userRow}>
           <UserAvatar
             uri={user?.profilePicture}
             size={hp('7%')}
             iconSize={RFValue(28)}
-            style={styles.avatar}
-          />
+            style={styles.avatar}/>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.name ?? 'User'}</Text>
             <Text style={styles.userEmail}>{user?.email ?? ''}</Text>

@@ -58,8 +58,7 @@ export default function PaymentScreen() {
                 name="cardHolderName"
                 rules={{ required: 'Card Holder Name is required' }}
                 placeholder="Card Holder Name"
-                error={errors.cardHolderName?.message}
-            />
+                error={errors.cardHolderName?.message}/>
 
             <FormInput
                 control={control}
@@ -70,8 +69,7 @@ export default function PaymentScreen() {
                 }}
                 placeholder="Card Number"
                 keyboardType="number-pad"
-                error={errors.cardNumber?.message}
-            />
+                error={errors.cardNumber?.message}/>
 
             <View style={styles.row}>
                 <View style={styles.halfWidth}>
@@ -80,8 +78,7 @@ export default function PaymentScreen() {
                         name="expiryDate"
                         rules={{ required: 'Expiry Date is required' }}
                         placeholder="Expiry Date"
-                        error={errors.expiryDate?.message}
-                    />
+                        error={errors.expiryDate?.message}/>
                 </View>
                 <View style={styles.halfWidth}>
                     <FormInput
@@ -95,8 +92,7 @@ export default function PaymentScreen() {
                         placeholder="CVV"
                         keyboardType="number-pad"
                         maxLength={3}
-                        error={errors.cvv?.message}
-                    />
+                        error={errors.cvv?.message}/>
                 </View>
             </View>
 
@@ -104,8 +100,7 @@ export default function PaymentScreen() {
                 title="Done"
                 onPress={handleSubmit(onSubmit)}
                 style={styles.paymentButton}
-                textStyle={styles.paymentButtonText}
-            />
+                textStyle={styles.paymentButtonText}/>
 
         </FormScreenLayout>
     );

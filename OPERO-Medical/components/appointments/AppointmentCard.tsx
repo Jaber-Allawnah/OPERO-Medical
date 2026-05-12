@@ -35,10 +35,6 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
         marginBottom: Spacing.sm,
         gap: Spacing.sm,
-        shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
     },
     info: {
         flex: 1,

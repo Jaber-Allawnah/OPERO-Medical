@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Text, Image, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import FormScreenLayout from '@/components/ui/FormScreenLayout';
 import { router } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,14 +77,7 @@ export default function LoginScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
+    <FormScreenLayout contentStyle={styles.scrollContent}>
           <Text style={styles.title}>LOG IN</Text>
 
           <Image
@@ -149,20 +142,11 @@ export default function LoginScreen() {
             title="SIGN UP"
             onPress={() => router.push('/(auth)/signup')}
             textStyle={styles.signUp} />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </FormScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.white,
-  },
-  keyboardView: {
-    flex: 1,
-  },
   scrollContent: {
     alignItems: 'center',
     paddingHorizontal: wp('8%'),

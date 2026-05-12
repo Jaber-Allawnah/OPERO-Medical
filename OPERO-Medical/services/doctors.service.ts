@@ -43,3 +43,4 @@ export const getDoctorById = async (id: string): Promise<any> => {
         ...doctorDoc.data(),
     };
 };
+

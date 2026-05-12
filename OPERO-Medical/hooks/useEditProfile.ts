@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { getCachedUser, getMe, updateUserProfile, updateProfilePicture, waitForUser } from '@/services/user.service';
+import { getCachedUser, getMe, updateUserProfile, updateProfilePicture } from '@/services/user.service';
+import { auth } from '@/services/firebase';
 import { updateDoctorProfile, getDoctorById } from '@/services/doctors.service';
 
 export default function useEditProfile() {
@@ -16,9 +17,8 @@ export default function useEditProfile() {
 
   useEffect(() => {
     const load = async () => {
-      const firebaseUser = await waitForUser();
       const cached = await getCachedUser();
-      const uid = firebaseUser?.uid ?? cached?.uid;
+      const uid = auth.currentUser?.uid ?? cached?.uid;
       if (!uid) return;
 
       let userData: any = null;
@@ -59,9 +59,8 @@ export default function useEditProfile() {
   const handleSave = useCallback(async (data: any) => {
     setIsSaving(true);
     try {
-      const firebaseUser = await waitForUser();
       const cached = await getCachedUser();
-      const uid = firebaseUser?.uid ?? cached?.uid;
+      const uid = auth.currentUser?.uid ?? cached?.uid;
       if (!uid) throw new Error('User is not authenticated.');
 
       await updateUserProfile(uid, data);
@@ -69,7 +68,7 @@ export default function useEditProfile() {
         await updateDoctorProfile(uid, { ...data, availableSlots: slots.filter((s) => s.trim() !== '') });
         queryClient.invalidateQueries({ queryKey: ['doctor', uid] });
       }
-      await getMe();
+      try { await getMe(); } catch {}
       Alert.alert('Success', 'Profile updated successfully.');
       router.back();
     } catch (e: any) {

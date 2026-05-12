@@ -1,5 +1,5 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, onAuthStateChanged } from 'firebase/auth';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail } from 'firebase/auth';
 import { auth, db } from './firebase';
 import { saveToStorage, getFromStorage } from './storage.service';
 
@@ -16,28 +16,21 @@ export const getMe = async () => {
 };
 
 export const updateUserProfile = async (uid: string, data: any) => {
-    const firebaseUser = await waitForUser();
     const update: any = { name: data.name, phone: data.phone };
     if (data.weight !== undefined) update.weight = data.weight;
     if (data.bloodGroup !== undefined) update.bloodGroup = data.bloodGroup;
     if (data.height !== undefined) update.height = data.height;
     await updateDoc(doc(db, 'users', uid), update);
-    if (data.email && data.email !== firebaseUser.email) {
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser && data.email && data.email !== firebaseUser.email) {
         await updateEmail(firebaseUser, data.email);
     }
 };
 
-export const waitForUser = () =>
-    new Promise<any>((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe();
-            resolve(user);
-        });
-    });
-
 export const changePassword = async (currentPassword: string, newPassword: string) => {
-    const user = await waitForUser();
-    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    const user = auth.currentUser;
+    if (!user) throw new Error('User is not authenticated.');
+    const credential = EmailAuthProvider.credential(user.email!, currentPassword);
     await reauthenticateWithCredential(user, credential);
     await updatePassword(user, newPassword);
 };

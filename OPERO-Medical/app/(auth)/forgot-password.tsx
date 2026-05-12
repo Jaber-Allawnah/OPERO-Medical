@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import {Text, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert, View,} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, StyleSheet, Alert, View } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp,} from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import FormScreenLayout from '@/components/ui/FormScreenLayout';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
@@ -33,13 +33,7 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-            style={styles.keyboardView}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}>
+    <FormScreenLayout contentStyle={styles.scrollContent}>
 
             <View style={styles.headerWrapper}>
               <Text style={styles.headerTitle}>RESET PASSWORD</Text>
@@ -71,25 +65,15 @@ export default function ForgotPasswordScreen() {
             />
 
             <ActionButton
-                title={resetPasswordMutation.isPending ? 'Sending...' : 'Send Reset Password Link'
-                }
+                title={resetPasswordMutation.isPending ? 'Sending...' : 'Send Reset Password Link'}
                 onPress={handleSubmit((data) => resetPasswordMutation.mutate(data as any))}
                 style={styles.button}
                 textStyle={styles.buttonText}/>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+    </FormScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  keyboardView: {
-    flex: 1,
-  },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.sm,
@@ -134,14 +118,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: Spacing.md,
     backgroundColor: Colors.primary,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
   },
   buttonText: {
     color: Colors.white,

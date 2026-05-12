@@ -55,8 +55,7 @@ export default function SignUpScreen() {
                 name="name"
                 rules={{ required: 'Full name is required' }}
                 placeholder="Full Name"
-                error={errors.name?.message}
-            />
+                error={errors.name?.message}/>
 
             <FormInput
                 control={control}
@@ -68,8 +67,7 @@ export default function SignUpScreen() {
                 placeholder="Enter your Email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                error={errors.email?.message}
-            />
+                error={errors.email?.message}/>
 
             <FormInput
                 control={control}
@@ -80,8 +78,7 @@ export default function SignUpScreen() {
                 }}
                 placeholder="Enter Your Phone Number"
                 keyboardType="phone-pad"
-                error={errors.phone?.message}
-            />
+                error={errors.phone?.message}/>
 
             <View style={styles.roleWrapper}>
                 <Text style={styles.roleLabel}>Select Role</Text>
@@ -90,14 +87,12 @@ export default function SignUpScreen() {
                         title="Patient"
                         onPress={() => setSelectedRole('patient')}
                         style={[styles.roleButton, selectedRole === 'patient' && styles.roleButtonActive]}
-                        textStyle={[styles.roleButtonText, selectedRole === 'patient' && styles.roleButtonTextActive]}
-                    />
+                        textStyle={[styles.roleButtonText, selectedRole === 'patient' && styles.roleButtonTextActive]}/>
                     <ActionButton
                         title="Doctor"
                         onPress={() => setSelectedRole('doctor')}
                         style={[styles.roleButton, selectedRole === 'doctor' && styles.roleButtonActive]}
-                        textStyle={[styles.roleButtonText, selectedRole === 'doctor' && styles.roleButtonTextActive]}
-                    />
+                        textStyle={[styles.roleButtonText, selectedRole === 'doctor' && styles.roleButtonTextActive]}/>
                 </View>
             </View>
 
@@ -106,8 +101,7 @@ export default function SignUpScreen() {
                     <Picker
                         selectedValue={selectedSpecialty}
                         onValueChange={(val) => setSelectedSpecialty(val)}
-                        style={styles.picker}
-                    >
+                        style={styles.picker}>
                         <Picker.Item label="Select Specialty..." value="" />
                         {SPECIALTIES.map((s) => <Picker.Item key={s} label={s} value={s} />)}
                     </Picker>
@@ -123,8 +117,7 @@ export default function SignUpScreen() {
                 }}
                 placeholder="Enter Your Password"
                 secureTextEntry
-                error={errors.password?.message}
-            />
+                error={errors.password?.message}/>
 
             <FormInput
                 control={control}
@@ -135,15 +128,13 @@ export default function SignUpScreen() {
                 }}
                 placeholder="Confirm Password"
                 secureTextEntry
-                error={errors.confirmPassword?.message}
-            />
+                error={errors.confirmPassword?.message}/>
 
             <ActionButton
                 title={signUpMutation.isPending ? 'Loading...' : 'Sign Up'}
                 onPress={handleSubmit((data: any) => signUpMutation.mutate(data))}
                 style={styles.signUpButton}
-                textStyle={styles.signUpButtonText}
-            />
+                textStyle={styles.signUpButtonText}/>
 
             <Text style={styles.or}>OR</Text>
 

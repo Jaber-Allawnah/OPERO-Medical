@@ -9,9 +9,12 @@ export default function RootLayout() {
     useEffect(() => {
         const checkAuth = async () => {
             const token = await getSecure('token');
+            const biometricEnabled = await getSecure('biometricEnabled');
 
-            if (token) {
-                router.replace('/(app)/doctors');
+            if (token && biometricEnabled === 'true') {
+                const { getCachedUser } = await import('@/services/user.service');
+                const user = await getCachedUser() as any;
+                router.replace(user?.role === 'doctor' ? '/(app)/appointments' : '/(app)/doctors');
             }
         };
 
@@ -23,7 +26,7 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(app)" />
+                <Stack.Screen name="(app)" />
             </Stack>
         </QueryClientProvider>
     </>

@@ -28,12 +28,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: Spacing.md,
     marginBottom: Spacing.md,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    overflow: 'hidden'
   },
   imageWrapper: {
     width: '100%',

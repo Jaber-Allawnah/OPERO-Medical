@@ -15,7 +15,8 @@ import PatientFields from '@/components/profile/PatientFields';
 import DoctorFields from '@/components/profile/DoctorFields';
 import useEditProfile from '@/hooks/useEditProfile';
 import { uploadToCloudinary } from '@/services/cloudinary.service';
-import { waitForUser, getCachedUser } from '@/services/user.service';
+import { getCachedUser } from '@/services/user.service';
+import { auth } from '@/services/firebase';
 
 export default function EditProfileScreen() {
   const { user, slots, isSaving, control, handleSubmit, errors, handleSave, addSlot, updateSlot, removeSlot, updateAvatar } = useEditProfile();
@@ -27,19 +28,26 @@ export default function EditProfileScreen() {
   const [permission, requestCameraPermission] = useCameraPermissions();
 
   const openCamera = async () => {
-    if (!permission?.granted) await requestCameraPermission();
-    setShowCamera(true);
+    if (permission?.granted) {
+      setShowCamera(true);
+      return;
+    }
+    const result = await requestCameraPermission();
+    if (result.granted) {
+      setShowCamera(true);
+    } else {
+      Alert.alert('Permission Required', 'Please allow camera access from settings to take a photo.');
+    }
   };
 
   const takePicture = async () => {
     try {
       setUploading(true);
-      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
+      const photo = await cameraRef.current?.takePictureAsync();
       if (!photo?.uri) return;
       const url = await uploadToCloudinary(photo.uri);
-      const firebaseUser = await waitForUser();
       const cached = await getCachedUser();
-      const uid = firebaseUser?.uid ?? cached?.uid;
+      const uid = auth.currentUser?.uid ?? cached?.uid;
       if (!uid) throw new Error('User is not authenticated.');
       await updateAvatar(uid, url);
       setShowCamera(false);

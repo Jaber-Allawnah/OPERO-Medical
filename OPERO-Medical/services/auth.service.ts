@@ -33,10 +33,8 @@ export const register = async (name: string, email: string, password: string, ph
             availableSlots: [],
         });
     }
-
-    const token = await userCredential.user.getIdToken();
     await getMe();
-    return { token };
+
 };
 export const resetPassword = async (email: string) => {
     await sendPasswordResetEmail(auth, email);

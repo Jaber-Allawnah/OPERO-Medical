@@ -1,35 +1,30 @@
 import { useCallback, useState } from 'react';
-import { Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { Text, ScrollView, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Colors, Spacing } from '@/constants/theme';
 import AppointmentCard from '@/components/appointments/AppointmentCard';
 import { getMyAppointments, cancelAppointment } from '@/services/appointments.service';
 import { getCachedUser } from '@/services/user.service';
 
 export default function AppointmentsScreen() {
+    const queryClient = useQueryClient();
     const [user, setUser] = useState<any>(null);
-    const [appointments, setAppointments] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    const loadAppointments = useCallback(async () => {
-        setLoading(true);
-        try {
-            const currentUser = await getCachedUser();
-            if (!currentUser) return;
-            setUser(currentUser);
-            const data = await getMyAppointments(currentUser.uid, currentUser.role);
-            setAppointments(data);
-        } catch (e: any) {
-            Alert.alert('Error', e?.message ?? 'Failed to load appointments.');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            getCachedUser().then(setUser);
+        }, [])
+    );
 
-    useFocusEffect(useCallback(() => { loadAppointments(); }, [loadAppointments]));
+    const { data: appointments = [], isLoading } = useQuery({
+        queryKey: ['appointments', user?.uid],
+        queryFn: () => getMyAppointments(user.uid, user.role),
+        enabled: !!user,
+    });
 
     const handleDelete = useCallback(async (appointmentId: string) => {
         Alert.alert('Remove Appointment', 'Are you sure you want to remove this appointment?', [
@@ -40,16 +35,16 @@ export default function AppointmentsScreen() {
                 onPress: async () => {
                     try {
                         await cancelAppointment(appointmentId);
-                        setAppointments((prev) => prev.filter((a) => a.id !== appointmentId));
+                        queryClient.invalidateQueries({ queryKey: ['appointments', user?.uid] });
                     } catch (e: any) {
                         Alert.alert('Error', e?.message ?? 'Failed to remove appointment.');
                     }
                 },
             },
         ]);
-    }, []);
+    }, [user?.uid]);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={Colors.primary} />
@@ -60,16 +55,14 @@ export default function AppointmentsScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Appointments</Text>
-            <FlatList
-                data={appointments}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <AppointmentCard appointment={item} role={user?.role} onDelete={handleDelete} />
-                )}
-                contentContainerStyle={styles.list}
-                ListEmptyComponent={<Text style={styles.empty}>No appointments yet.</Text>}
-                showsVerticalScrollIndicator={false}
-            />
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+                {appointments.length === 0
+                    ? <Text style={styles.empty}>No appointments yet.</Text>
+                    : appointments.map((item: any) => (
+                        <AppointmentCard key={item.id} appointment={item} role={user?.role} onDelete={handleDelete} />
+                    ))
+                }
+            </ScrollView>
         </SafeAreaView>
     );
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { router } from 'expo-router';
 import { RFValue } from 'react-native-responsive-fontsize';
