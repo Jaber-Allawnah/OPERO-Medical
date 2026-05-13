@@ -14,6 +14,7 @@ import { getAllDoctors } from '@/services/doctors.service';
 import { getCachedUser } from '@/services/user.service';
 import ActionButton from '@/components/ui/ActionButton';
 import UserAvatar from '@/components/ui/UserAvatar';
+import {getDatabaseInstance} from "@/services/database.service";
 
 const SPECIALIZATIONS = [
   'All', 'Cardiology', 'Dermatology', 'Neurology', 'Orthopedics',
@@ -52,10 +53,7 @@ export default function DoctorsScreen() {
       if (!cancelled) setIsOnline(online);
 
       if (!online) {
-        const database = await SQLite.openDatabaseAsync('doctors_offline.db');
-        await database.execAsync(
-          'CREATE TABLE IF NOT EXISTS doctors (id INTEGER PRIMARY KEY, name TEXT, specialty TEXT, experience INTEGER);'
-        );
+        const database = await getDatabaseInstance();
         const existing = await database.getAllAsync('SELECT * FROM doctors');
         if (existing.length === 0) {
           await database.runAsync('INSERT INTO doctors VALUES (1, ?, ?, ?)', ['Jaber', 'Cardiology', 5]);
@@ -73,7 +71,7 @@ export default function DoctorsScreen() {
     db.getAllAsync<{id: number; name: string; specialty: string; experience: number }>(
       'SELECT * FROM doctors;'
     ).then(setOfflineDoctors);
-  }, [db]);
+  }, [db,refreshCount]);
 
   const doctors = isOnline ? (data ?? []) : offlineDoctors;
 
