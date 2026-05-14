@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import FormInput from '@/components/ui/FormInput';
 import { login } from '@/services/auth.service';
-import { saveSecure, getSecure } from '@/services/storage.service';
+import {saveSecure, getSecure} from '@/services/storage.service';
 import { getMe, getCachedUser } from '@/services/user.service';
 import ActionButton from '@/components/ui/ActionButton';
 import useAuthMutation from "@/hooks/useAuthMutation";

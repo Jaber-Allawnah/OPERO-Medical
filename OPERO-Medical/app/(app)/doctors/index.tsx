@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import * as SQLite from 'expo-sqlite';
 import * as Network from 'expo-network';
 import { Colors, Spacing } from '@/constants/theme';
 import DoctorCard from '@/components/doctors/DoctorCard';
 import { getAllDoctors } from '@/services/doctors.service';
-import { getCachedUser } from '@/services/user.service';
+import useCurrentUser from '@/hooks/useCurrentUser';
 import ActionButton from '@/components/ui/ActionButton';
 import UserAvatar from '@/components/ui/UserAvatar';
 import {getDatabaseInstance} from "@/services/database.service";
@@ -26,7 +26,7 @@ const SPECIALIZATIONS = [
 export default function DoctorsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpec, setSelectedSpec] = useState('All');
-  const [user, setUser] = useState<any>(null);
+  const user = useCurrentUser();
   const [db, setDb] = useState<SQLite.SQLiteDatabase | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [offlineDoctors, setOfflineDoctors] = useState<any[]>([]);
@@ -39,11 +39,6 @@ export default function DoctorsScreen() {
     enabled: isOnline,
   });
 
-  useFocusEffect(
-    useCallback(() => {
-      getCachedUser().then(setUser);
-    }, [])
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -75,11 +70,12 @@ export default function DoctorsScreen() {
 
   const doctors = isOnline ? (data ?? []) : offlineDoctors;
 
-  const displayDoctors = doctors.filter((doctor: any) => {
-    const matchesSearch = doctor.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSpec = selectedSpec === 'All' || doctor.specialty === selectedSpec;
-    return matchesSearch && matchesSpec;
-  });
+  const displayDoctors = useMemo(() =>
+    doctors.filter((doctor: any) => {
+      const matchesSearch = doctor.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSpec = selectedSpec === 'All' || doctor.specialty === selectedSpec;
+      return matchesSearch && matchesSpec;
+    }), [doctors, searchQuery, selectedSpec]);
 
   return (
     <SafeAreaView style={styles.container}>

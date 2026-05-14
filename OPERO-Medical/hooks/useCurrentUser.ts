@@ -11,3 +11,4 @@ export default function useCurrentUser() {
   );
   return user;
 }
+
